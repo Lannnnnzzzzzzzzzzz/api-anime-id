@@ -101,7 +101,7 @@ func AnimeDetailApi(c *fiber.Ctx) error {
 	if err != nil {
 		return c.JSON(ApiResponse{
 			Status:  "failed",
-			Message: "failed to fetch anime",
+			Message: "failed to fetch anime: " + err.Error(),
 			Data:    nil,
 		})
 	}
@@ -122,7 +122,7 @@ func EpisodeApi(c *fiber.Ctx) error {
 	if err != nil {
 		return c.JSON(ApiResponse{
 			Status:  "failed",
-			Message: "failed to fetch anime",
+			Message: "failed to fetch episode: " + err.Error(),
 			Data:    nil,
 		})
 	}

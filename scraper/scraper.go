@@ -203,6 +203,12 @@ func (s *Scraper) AnimePage(slug string) (anime models.AnimeDetail, err error) {
 	if err != nil {
 		return models.AnimeDetail{}, err
 	}
+
+	// Validate that we actually got data
+	if anime.Title == "" {
+		return models.AnimeDetail{}, fmt.Errorf("no anime data found for slug: %s (page may not exist or HTML structure changed)", slug)
+	}
+
 	return anime, nil
 }
 
@@ -247,6 +253,11 @@ func (s *Scraper) EpisodeDetailPage(slug string) (episode models.EpisodePage, er
 	err = s.collector.Visit(fmt.Sprintf("%v/episode/%v", OtakudesuBaseURL, slug))
 	if err != nil {
 		return models.EpisodePage{}, err
+	}
+
+	// Validate that we actually got data
+	if len(episode.Downloads) == 0 {
+		return models.EpisodePage{}, fmt.Errorf("no episode data found for slug: %s (page may not exist or HTML structure changed)", slug)
 	}
 
 	return episode, nil
