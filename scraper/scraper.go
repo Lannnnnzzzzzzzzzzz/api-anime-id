@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Satr10/Otakudesu-Api/models"
+	"github.com/Lannnnnzzzzzzzzzzz/api-anime-id/models"
 	"github.com/gocolly/colly"
 )
 

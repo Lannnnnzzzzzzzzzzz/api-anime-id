@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Satr10/Otakudesu-Api/router"
+	"github.com/Lannnnnzzzzzzzzzzz/api-anime-id/router"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/gofiber/fiber/v2/middleware/cache"

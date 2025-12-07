@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/Satr10/Otakudesu-Api/handlers"
+	"github.com/Lannnnnzzzzzzzzzzz/api-anime-id/handlers"
 	"github.com/gofiber/fiber/v2"
 )
 

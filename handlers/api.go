@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/Satr10/Otakudesu-Api/scraper"
+	"github.com/Lannnnnzzzzzzzzzzz/api-anime-id/scraper"
 	"github.com/gofiber/fiber/v2"
 )
 

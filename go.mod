@@ -1,4 +1,4 @@
-module github.com/Satr10/Otakudesu-Api
+module github.com/Lannnnnzzzzzzzzzzz/api-anime-id
 
 go 1.24.3
 
