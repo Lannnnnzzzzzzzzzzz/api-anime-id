@@ -3,6 +3,7 @@ package scraper
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Lannnnnzzzzzzzzzzz/api-anime-id/models"
 	"github.com/gocolly/colly"
@@ -24,6 +25,12 @@ func NewScraper() *Scraper {
 		colly.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"),
 		colly.MaxDepth(1),
 	)
+
+	c.SetRequestTimeout(30 * time.Second)
+
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Printf("Request URL: %s failed with response: %v\nError: %v\n", r.Request.URL, r, err)
+	})
 
 	return &Scraper{collector: c}
 }
