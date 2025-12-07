@@ -219,31 +219,59 @@ func (s *Scraper) AnimePage(slug string) (anime models.AnimeDetail, err error) {
 //     quality, size, and download URLs of the episode.
 //   - StreamingURL: The streaming URL of the episode, if available.
 func (s *Scraper) EpisodeDetailPage(slug string) (episode models.EpisodePage, err error) {
-	// find all streaming URLs and mirrors
-	s.collector.OnHTML(`div.download`, func(downloadDiv *colly.HTMLElement) {
-		downloadDiv.ForEach(`ul`, func(_ int, ul *colly.HTMLElement) {
-			ul.ForEach(`li`, func(_ int, li *colly.HTMLElement) {
-				episodeDL := models.EpisodeDownloads{}
+	// find all streaming mirrors
+	s.collector.OnHTML(`div.mirrorstream ul`, func(ul *colly.HTMLElement) {
+		ul.ForEach(`li`, func(_ int, li *colly.HTMLElement) {
+			episodeDL := models.EpisodeDownloads{}
 
-				quality := li.ChildText(`strong`)
-				size := li.ChildText(`i`)
+			quality := li.ChildText(`strong`)
+			size := li.ChildText(`i`)
 
-				if quality != "" {
-					episodeDL.Quality = quality
-					episodeDL.Size = size
+			if quality != "" {
+				episodeDL.Quality = quality
+				episodeDL.Size = size
 
-					li.ForEach(`a`, func(_ int, a *colly.HTMLElement) {
-						download := models.Download{}
-						download.DownloadURL = a.Attr(`href`)
-						download.Provider = a.Text
+				li.ForEach(`a`, func(_ int, a *colly.HTMLElement) {
+					download := models.Download{}
+					download.DownloadURL = a.Attr(`href`)
+					download.Provider = strings.TrimSpace(a.Text)
+					if download.DownloadURL != "" && download.Provider != "" {
 						episodeDL.Downloads = append(episodeDL.Downloads, download)
-					})
-
-					if len(episodeDL.Downloads) > 0 {
-						episode.Downloads = append(episode.Downloads, episodeDL)
 					}
+				})
+
+				if len(episodeDL.Downloads) > 0 {
+					episode.Downloads = append(episode.Downloads, episodeDL)
 				}
-			})
+			}
+		})
+	})
+
+	// find all download mirrors
+	s.collector.OnHTML(`div.download ul`, func(ul *colly.HTMLElement) {
+		ul.ForEach(`li`, func(_ int, li *colly.HTMLElement) {
+			episodeDL := models.EpisodeDownloads{}
+
+			quality := li.ChildText(`strong`)
+			size := li.ChildText(`i`)
+
+			if quality != "" {
+				episodeDL.Quality = quality
+				episodeDL.Size = size
+
+				li.ForEach(`a`, func(_ int, a *colly.HTMLElement) {
+					download := models.Download{}
+					download.DownloadURL = a.Attr(`href`)
+					download.Provider = strings.TrimSpace(a.Text)
+					if download.DownloadURL != "" && download.Provider != "" {
+						episodeDL.Downloads = append(episodeDL.Downloads, download)
+					}
+				})
+
+				if len(episodeDL.Downloads) > 0 {
+					episode.Downloads = append(episode.Downloads, episodeDL)
+				}
+			}
 		})
 	})
 
