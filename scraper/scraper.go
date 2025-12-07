@@ -224,19 +224,18 @@ func (s *Scraper) EpisodeDetailPage(slug string) (episode models.EpisodePage, er
 		colly.MaxDepth(1),
 	)
 
-	c.OnHTML(`div.download li`, func(li *colly.HTMLElement) {
+	c.OnHTML(`div.mirrorstream ul`, func(ul *colly.HTMLElement) {
 		episodeDL := models.EpisodeDownloads{}
 
-		quality := li.ChildText(`strong`)
-		size := li.ChildText(`i`)
+		quality := ul.ChildText(`li strong`)
 
 		if quality != "" {
 			episodeDL.Quality = quality
-			episodeDL.Size = size
+			episodeDL.Size = ""
 
-			li.ForEach(`a`, func(_ int, a *colly.HTMLElement) {
+			ul.ForEach(`li a`, func(_ int, a *colly.HTMLElement) {
 				download := models.Download{}
-				download.DownloadURL = a.Attr(`href`)
+				download.DownloadURL = a.Attr(`data-content`)
 				download.Provider = strings.TrimSpace(a.Text)
 				if download.DownloadURL != "" && download.Provider != "" {
 					episodeDL.Downloads = append(episodeDL.Downloads, download)
