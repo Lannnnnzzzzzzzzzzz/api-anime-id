@@ -219,8 +219,13 @@ func (s *Scraper) AnimePage(slug string) (anime models.AnimeDetail, err error) {
 //     quality, size, and download URLs of the episode.
 //   - StreamingURL: The streaming URL of the episode, if available.
 func (s *Scraper) EpisodeDetailPage(slug string) (episode models.EpisodePage, err error) {
+	c := colly.NewCollector(
+		colly.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"),
+		colly.MaxDepth(1),
+	)
+
 	// find all streaming mirrors
-	s.collector.OnHTML(`div.mirrorstream ul`, func(ul *colly.HTMLElement) {
+	c.OnHTML(`div.mirrorstream ul`, func(ul *colly.HTMLElement) {
 		ul.ForEach(`li`, func(_ int, li *colly.HTMLElement) {
 			episodeDL := models.EpisodeDownloads{}
 
@@ -248,7 +253,7 @@ func (s *Scraper) EpisodeDetailPage(slug string) (episode models.EpisodePage, er
 	})
 
 	// find all download mirrors
-	s.collector.OnHTML(`div.download ul`, func(ul *colly.HTMLElement) {
+	c.OnHTML(`div.download ul`, func(ul *colly.HTMLElement) {
 		ul.ForEach(`li`, func(_ int, li *colly.HTMLElement) {
 			episodeDL := models.EpisodeDownloads{}
 
@@ -275,7 +280,7 @@ func (s *Scraper) EpisodeDetailPage(slug string) (episode models.EpisodePage, er
 		})
 	})
 
-	err = s.collector.Visit(fmt.Sprintf("%v/episode/%v", OtakudesuBaseURL, slug))
+	err = c.Visit(fmt.Sprintf("%v/episode/%v", OtakudesuBaseURL, slug))
 	if err != nil {
 		return models.EpisodePage{}, err
 	}
