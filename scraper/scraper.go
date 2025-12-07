@@ -224,60 +224,29 @@ func (s *Scraper) EpisodeDetailPage(slug string) (episode models.EpisodePage, er
 		colly.MaxDepth(1),
 	)
 
-	// find all streaming mirrors
-	c.OnHTML(`div.mirrorstream ul`, func(ul *colly.HTMLElement) {
-		ul.ForEach(`li`, func(_ int, li *colly.HTMLElement) {
-			episodeDL := models.EpisodeDownloads{}
+	c.OnHTML(`div.download li`, func(li *colly.HTMLElement) {
+		episodeDL := models.EpisodeDownloads{}
 
-			quality := li.ChildText(`strong`)
-			size := li.ChildText(`i`)
+		quality := li.ChildText(`strong`)
+		size := li.ChildText(`i`)
 
-			if quality != "" {
-				episodeDL.Quality = quality
-				episodeDL.Size = size
+		if quality != "" {
+			episodeDL.Quality = quality
+			episodeDL.Size = size
 
-				li.ForEach(`a`, func(_ int, a *colly.HTMLElement) {
-					download := models.Download{}
-					download.DownloadURL = a.Attr(`href`)
-					download.Provider = strings.TrimSpace(a.Text)
-					if download.DownloadURL != "" && download.Provider != "" {
-						episodeDL.Downloads = append(episodeDL.Downloads, download)
-					}
-				})
-
-				if len(episodeDL.Downloads) > 0 {
-					episode.Downloads = append(episode.Downloads, episodeDL)
+			li.ForEach(`a`, func(_ int, a *colly.HTMLElement) {
+				download := models.Download{}
+				download.DownloadURL = a.Attr(`href`)
+				download.Provider = strings.TrimSpace(a.Text)
+				if download.DownloadURL != "" && download.Provider != "" {
+					episodeDL.Downloads = append(episodeDL.Downloads, download)
 				}
+			})
+
+			if len(episodeDL.Downloads) > 0 {
+				episode.Downloads = append(episode.Downloads, episodeDL)
 			}
-		})
-	})
-
-	// find all download mirrors
-	c.OnHTML(`div.download ul`, func(ul *colly.HTMLElement) {
-		ul.ForEach(`li`, func(_ int, li *colly.HTMLElement) {
-			episodeDL := models.EpisodeDownloads{}
-
-			quality := li.ChildText(`strong`)
-			size := li.ChildText(`i`)
-
-			if quality != "" {
-				episodeDL.Quality = quality
-				episodeDL.Size = size
-
-				li.ForEach(`a`, func(_ int, a *colly.HTMLElement) {
-					download := models.Download{}
-					download.DownloadURL = a.Attr(`href`)
-					download.Provider = strings.TrimSpace(a.Text)
-					if download.DownloadURL != "" && download.Provider != "" {
-						episodeDL.Downloads = append(episodeDL.Downloads, download)
-					}
-				})
-
-				if len(episodeDL.Downloads) > 0 {
-					episode.Downloads = append(episode.Downloads, episodeDL)
-				}
-			}
-		})
+		}
 	})
 
 	err = c.Visit(fmt.Sprintf("%v/episode/%v", OtakudesuBaseURL, slug))
