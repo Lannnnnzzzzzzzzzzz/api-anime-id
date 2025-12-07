@@ -219,29 +219,32 @@ func (s *Scraper) AnimePage(slug string) (anime models.AnimeDetail, err error) {
 //     quality, size, and download URLs of the episode.
 //   - StreamingURL: The streaming URL of the episode, if available.
 func (s *Scraper) EpisodeDetailPage(slug string) (episode models.EpisodePage, err error) {
-	// find streaming URL
-	s.collector.OnHTML(`div.responsive-embed-stream iframe`, func(h *colly.HTMLElement) {
-		episodeDL := models.EpisodeDownloads{}
-		episodeDL.Quality = "Streaming"
-		episodeDL.Size = "N/A" // Size is not available for streaming
-		stream := models.Download{}
-		stream.Provider = "Streaming URL"
-		stream.DownloadURL = h.Attr(`src`)
-		episodeDL.Downloads = append(episodeDL.Downloads, stream)
-		episode.Downloads = append(episode.Downloads, episodeDL)
-	})
+	// find all streaming URLs and mirrors
+	s.collector.OnHTML(`div.download`, func(downloadDiv *colly.HTMLElement) {
+		downloadDiv.ForEach(`ul`, func(_ int, ul *colly.HTMLElement) {
+			ul.ForEach(`li`, func(_ int, li *colly.HTMLElement) {
+				episodeDL := models.EpisodeDownloads{}
 
-	s.collector.OnHTML(`div.download ul li`, func(h *colly.HTMLElement) {
-		episodeDL := models.EpisodeDownloads{}
-		episodeDL.Quality = h.ChildText(`strong`)
-		episodeDL.Size = h.ChildText(`i`)
-		h.ForEach(`a`, func(_ int, h *colly.HTMLElement) {
-			download := models.Download{}
-			download.DownloadURL = h.Attr(`href`)
-			download.Provider = h.Text
-			episodeDL.Downloads = append(episodeDL.Downloads, download)
+				quality := li.ChildText(`strong`)
+				size := li.ChildText(`i`)
+
+				if quality != "" {
+					episodeDL.Quality = quality
+					episodeDL.Size = size
+
+					li.ForEach(`a`, func(_ int, a *colly.HTMLElement) {
+						download := models.Download{}
+						download.DownloadURL = a.Attr(`href`)
+						download.Provider = a.Text
+						episodeDL.Downloads = append(episodeDL.Downloads, download)
+					})
+
+					if len(episodeDL.Downloads) > 0 {
+						episode.Downloads = append(episode.Downloads, episodeDL)
+					}
+				}
+			})
 		})
-		episode.Downloads = append(episode.Downloads, episodeDL)
 	})
 
 	err = s.collector.Visit(fmt.Sprintf("%v/episode/%v", OtakudesuBaseURL, slug))
