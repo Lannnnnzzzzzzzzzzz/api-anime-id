@@ -8,7 +8,7 @@ import (
 	"github.com/gocolly/colly"
 )
 
-const OtakudesuBaseURL string = "https://otakudesu.cloud"
+const OtakudesuBaseURL string = "https://otakudesu.best"
 
 type Scraper struct {
 	collector *colly.Collector
